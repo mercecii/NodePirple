@@ -4,10 +4,10 @@
 var http = require('http');
 const url = require('url');
 const StringDecoder = require('string_decoder').StringDecoder;
-const config = require('./config');
+const config = require('./lib/config');
 const router = require('./lib/router');
 const handler = require('./lib/handler');
-
+const helpers = require('./lib/helpers');
 // const config = {port:3000,envName:"Staging"}
 
 
@@ -15,7 +15,6 @@ const handler = require('./lib/handler');
 var server = http.createServer(function(req,res){
 
     // Get the URL and Parse it
-    debugger;
     var parsedUrl = url.parse(req.url,true);
     
 
@@ -49,18 +48,17 @@ var server = http.createServer(function(req,res){
         console.log("Payload Buffer = ",);
         // Send the response 
         
-        debugger;
 
         var data = {
             headers:req.headers,
-            method:req.method,
+            method:req.method.toLowerCase(),
             query:queryStringObject,
             path:trimmedPath,
-            payload:buffer
+            payload:helpers.parseJsonObject(buffer)
         }
 
-
         var chosenHandler = router[trimmedPath] !== undefined ? router[trimmedPath]:handler.notFound;
+        
         chosenHandler(data,function(statusCode,payload){
             statusCode = typeof(statusCode) !== "number" ? 200:statusCode;
             payload = typeof(payload) !== 'object' ?{}:payload;
